@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inventory &amp; Billing System</title>
+  <style>
+    :root {
+      --bg: #f4f6fa;
+      --card: #fff;
+      --text: #1d2433;
+      --muted: #667085;
+      --line: #e3e7ee;
+      --pri: #2f5bea;
+      --pri-t: #fff;
+      --ok: #12805c;
+      --warn: #b54708;
+      --bad: #c0262d;
+      --hov: #eef2ff
+    }
+
+    @media (prefers-color-scheme:dark) {
+      :root {
+        --bg: #10141c;
+        --card: #181e2a;
+        --text: #e8ecf4;
+        --muted: #9aa4b8;
+        --line: #2a3243;
+        --pri: #6c8cff;
+        --pri-t: #0b1020;
+        --ok: #4cd3a0;
+        --warn: #f5a45b;
+        --bad: #ff7b80;
+        --hov: #1f2740
+      }
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px
+    }
+
+    .app {
+      display: flex;
+      min-height: 100vh
+    }
+
+    aside {
+      width: 210px;
+      background: var(--card);
+      border-right: 1px solid var(--line);
+      padding: 18px 12px;
+      position: sticky;
+      top: 0;
+      height: 100vh
+    }
+
+    aside h1 {
+      font-size: 16px;
+      margin: 0 8px 18px;
+      line-height: 1.3
+    }
+
+    nav button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: none;
+      border: 0;
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-bottom: 4px
+    }
+
+    nav button:hover {
+      background: var(--hov)
+    }
+
+    nav button.active {
+      background: var(--pri);
+      color: var(--pri-t);
+      font-weight: 600
+    }
+
+    main {
+      flex: 1;
+      padding: 24px;
+      max-width: 1100px
+    }
+
+    h2 {
+      margin: 0 0 16px;
+      font-size: 20px
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px
+    }
+
+    .stat small {
+      color: var(--muted);
+      display: block;
+      margin-bottom: 6px
+    }
+
+    .stat b {
+      font-size: 22px
+    }
+
+    .bar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px
+    }
+
+    input,
+    select {
+      padding: 9px 11px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--card);
+      color: var(--text);
+      font-size: 14px;
+      min-width: 0
+    }
+
+    input:focus,
+    select:focus {
+      outline: 2px solid var(--pri);
+      outline-offset: -1px
+    }
+
+    .bar input[type=search] {
+      flex: 1;
+      min-width: 180px
+    }
+
+    .btn {
+      background: var(--pri);
+      color: var(--pri-t);
+      border: 0;
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: 600
+    }
+
+    .btn.sec {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--line)
+    }
+
+    .btn.sm {
+      padding: 5px 10px;
+      font-size: 13px
+    }
+
+    .btn.del {
+      background: transparent;
+      color: var(--bad);
+      border: 1px solid var(--line)
+    }
+
+    .tw {
+      overflow-x: auto;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse
+    }
+
+    th,
+    td {
+      padding: 11px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+      white-space: nowrap
+    }
+
+    th {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: var(--muted)
+    }
+
+    tr:last-child td {
+      border-bottom: 0
+    }
+
+    .r {
+      text-align: right
+    }
+
+    .badge {
+      padding: 3px 9px;
+      border-radius: 99px;
+      font-size: 12px;
+      font-weight: 600
+    }
+
+    .b-ok {
+      background: color-mix(in srgb, var(--ok) 18%, transparent);
+      color: var(--ok)
+    }
+
+    .b-low {
+      background: color-mix(in srgb, var(--warn) 20%, transparent);
+      color: var(--warn)
+    }
+
+    .b-out {
+      background: color-mix(in srgb, var(--bad) 18%, transparent);
+      color: var(--bad)
+    }
+
+    .empty {
+      padding: 28px;
+      text-align: center;
+      color: var(--muted)
+    }
+
+    .grid2 {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 16px
+    }
+
+    @media(max-width:820px) {
+      .app {
+        flex-direction: column
+      }
+
+      aside {
+        width: 100%;
+        height: auto;
+        position: static;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+        padding: 10px
+      }
+
+      aside h1 {
+        margin-bottom: 8px
+      }
+
+      nav {
+        display: flex;
+        gap: 4px;
+        overflow-x: auto
+      }
+
+      nav button {
+        width: auto;
+        white-space: nowrap;
+        margin: 0
+      }
+
+      .grid2 {
+        grid-template-columns: 1fr
+      }
+
+      main {
+        padding: 14px
+      }
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0
+    }
+
+    .row.tot {
+      border-top: 1px solid var(--line);
+      margin-top: 6px;
+      padding-top: 10px;
+      font-weight: 700;
+      font-size: 17px
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      margin: 10px 0 4px
+    }
+
+    label+input,
+    label+select {
+      width: 100%
+    }
+
+    dialog {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--card);
+      color: var(--text);
+      padding: 22px;
+      width: min(440px, 92vw)
+    }
+
+    dialog::backdrop {
+      background: rgba(0, 0, 0, .45)
+    }
+
+    .acts {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 18px
+    }
+
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--text);
+      color: var(--bg);
+      padding: 10px 16px;
+      border-radius: 8px;
+      opacity: 0;
+      transition: .25s;
+      pointer-events: none
+    }
+
+    #toast.show {
+      opacity: 1
+    }
+
+    .inv {
+      font-family: ui-monospace, Menlo, Consolas, monospace;
+      font-size: 13px
+    }
+
+    .inv h3 {
+      text-align: center;
+      margin: 0 0 8px
+    }
+
+    .view {
+      display: none
+    }
+
+    .view.active {
+      display: block
+    }
+
+    @media print {
+
+      .app,
+      #toast,
+      .noprint {
+        display: none !important
+      }
+
+      dialog {
+        position: static;
+        border: 0;
+        width: 100%;
+        color: #000;
+        background: #fff
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <aside>
+      <h1>📦 Inventory &amp; Billing</h1>
+      <nav id="nav">
+        <button data-v="dash" class="active">Dashboard</button>
+        <button data-v="prod">Products</button>
+        <button data-v="bill">New Bill</button>
+        <button data-v="sales">Sales Report</button>
+      </nav>
+    </aside>
+    <main>
+
+      <section class="view active" id="v-dash">
+        <h2>Dashboard</h2>
+        <div class="cards" id="stats"></div>
+        <h2 style="font-size:16px">Low stock alerts</h2>
+        <div class="tw">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th class="r">Qty</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="lowBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="view" id="v-prod">
+        <h2>Products</h2>
+        <div class="bar"><input type="search" id="q" placeholder="Search products…"><button class="btn" id="addBtn">+
+            Add product</button></div>
+        <div class="tw">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th class="r">Price (Rs)</th>
+                <th class="r">Qty</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="prodBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="view" id="v-bill">
+        <h2>New Bill</h2>
+        <div class="grid2">
+          <div class="card">
+            <div class="bar"><select id="bp" style="flex:1"></select><input type="number" id="bq" value="1" min="1"
+                style="width:80px"><button class="btn" id="bAdd">Add</button></div>
+            <div class="tw">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th class="r">Price</th>
+                    <th class="r">Qty</th>
+                    <th class="r">Total</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="cartBody"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <label style="margin-top:0">Customer name</label><input id="cust" placeholder="Walk-in">
+            <label>Discount %</label><input type="number" id="disc" value="0" min="0" max="100">
+            <div style="margin-top:14px">
+              <div class="row"><span>Subtotal</span><span id="tSub"></span></div>
+              <div class="row"><span>Discount</span><span id="tDisc"></span></div>
+              <div class="row"><span>GST (18%)</span><span id="tGst"></span></div>
+              <div class="row tot"><span>Grand total</span><span id="tGrand"></span></div>
+            </div>
+            <div class="acts"><button class="btn sec" id="clr">Clear</button><button class="btn" id="gen">Generate
+                bill</button></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="v-sales">
+        <h2>Sales Report</h2>
+        <div class="cards" id="sStats"></div>
+        <div class="tw">
+          <table>
+            <thead>
+              <tr>
+                <th>Bill No</th>
+                <th>Date</th>
+                <th>Customer</th>
+                <th class="r">Items</th>
+                <th class="r">Amount (Rs)</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="salesBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <dialog id="pdlg">
+    <h3 id="pt" style="margin:0 0 6px">Add product</h3>
+    <label>Name</label><input id="pn">
+    <label>Price (Rs)</label><input type="number" id="pp" min="0" step="0.01">
+    <label>Quantity</label><input type="number" id="pq" min="0" step="1">
+    <div class="acts"><button class="btn sec" id="pc">Cancel</button><button class="btn" id="ps">Save</button></div>
+  </dialog>
+
+  <dialog id="idlg">
+    <div class="inv" id="invBody"></div>
+    <div class="acts noprint"><button class="btn sec" id="ic">Close</button><button class="btn" id="ip">Print</button>
+    </div>
+  </dialog>
+
+  <div id="toast"></div>
+
+  <script>
+    const GST = 18, LOW = 5;
+    let D = { products: [], sales: [], next: 1, bill: 1000 };
+    let cart = [], editId = null;
+    const $ = id => document.getElementById(id);
+    const money = n => Number(n).toFixed(2);
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+    async function api(method, url, body) {
+      try {
+        const r = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.error || 'Request failed');
+        return j;
+      } catch (e) { toast(e.message === 'Failed to fetch' ? 'Cannot reach server. Is it running?' : e.message); throw e }
+    }
+    async function refresh() {
+      try { D.products = await api('GET', '/api/products'); D.sales = await api('GET', '/api/bills') } catch (e) { }
+      render();
+    }
+    function toast(m) { const t = $('toast'); t.textContent = m; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2200) }
+    function status(q) { return q === 0 ? '<span class="badge b-out">Out of stock</span>' : q <= LOW ? '<span class="badge b-low">Low</span>' : '<span class="badge b-ok">In stock</span>' }
+
+    /* navigation */
+    $('nav').onclick = e => {
+      const b = e.target.closest('button'); if (!b) return;
+      document.querySelectorAll('nav button').forEach(x => x.classList.toggle('active', x === b));
+      document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'v-' + b.dataset.v));
+      render()
+    };
+
+    /* products */
+    function renderProducts() {
+      const k = $('q').value.trim().toLowerCase();
+      const list = D.products.filter(p => p.name.toLowerCase().includes(k));
+      $('prodBody').innerHTML = list.length ? list.map(p => `<tr><td>${p.id}</td><td>${esc(p.name)}</td><td class="r">${money(p.price)}</td><td class="r">${p.qty}</td><td>${status(p.qty)}</td>
+  <td class="r"><button class="btn sm sec" data-e="${p.id}">Edit</button> <button class="btn sm del" data-d="${p.id}">Delete</button></td></tr>`).join('') : '<tr><td colspan="6" class="empty">No products found.</td></tr>';
+    }
+    $('q').oninput = renderProducts;
+    $('prodBody').onclick = e => {
+      const ed = e.target.dataset.e, dl = e.target.dataset.d;
+      if (ed) openProd(+ed);
+      if (dl && confirm('Delete this product?')) { api('DELETE', '/api/products/' + dl).then(() => { toast('Product deleted'); return refresh() }).catch(() => { }) }
+    };
+    function openProd(id) {
+      editId = id || null; const p = D.products.find(x => x.id === id);
+      $('pt').textContent = p ? 'Edit product' : 'Add product';
+      $('pn').value = p ? p.name : ''; $('pp').value = p ? p.price : ''; $('pq').value = p ? p.qty : '';
+      $('pdlg').showModal(); $('pn').focus();
+    }
+    $('addBtn').onclick = () => openProd(0);
+    $('pc').onclick = () => $('pdlg').close();
+    $('ps').onclick = () => {
+      const name = $('pn').value.trim(), price = parseFloat($('pp').value), qty = parseInt($('pq').value);
+      if (!name || isNaN(price) || price < 0 || isNaN(qty) || qty < 0) { toast('Enter valid name, price and quantity'); return }
+      api(editId ? 'PUT' : 'POST', editId ? '/api/products/' + editId : '/api/products', { name, price, qty })
+        .then(() => { $('pdlg').close(); toast('Product saved'); return refresh() }).catch(() => { });
+    };
+
+    /* dashboard */
+    function renderDash() {
+      const val = D.products.reduce((s, p) => s + p.price * p.qty, 0);
+      const rev = D.sales.reduce((s, x) => s + x.total, 0);
+      const low = D.products.filter(p => p.qty <= LOW);
+      $('stats').innerHTML = [['Products', D.products.length], ['Stock value', 'Rs ' + money(val)], ['Low / out of stock', low.length], ['Total revenue', 'Rs ' + money(rev)]]
+        .map(a => `<div class="card stat"><small>${a[0]}</small><b>${a[1]}</b></div>`).join('');
+      $('lowBody').innerHTML = low.length ? low.map(p => `<tr><td>${p.id}</td><td>${esc(p.name)}</td><td class="r">${p.qty}</td><td>${status(p.qty)}</td></tr>`).join('') : '<tr><td colspan="4" class="empty">All products are well stocked.</td></tr>';
+    }
+
+    /* billing */
+    function renderBillSelect() {
+      const av = D.products.filter(p => p.qty > 0);
+      $('bp').innerHTML = av.length ? av.map(p => `<option value="${p.id}">${esc(p.name)} - Rs ${money(p.price)} (${p.qty} left)</option>`).join('') : '<option value="">No stock available</option>';
+    }
+    function totals() {
+      const sub = cart.reduce((s, c) => s + c.price * c.qty, 0);
+      const dp = Math.min(100, Math.max(0, parseFloat($('disc').value) || 0));
+      const disc = sub * dp / 100, gst = (sub - disc) * GST / 100;
+      return { sub, disc, gst, total: sub - disc + gst };
+    }
+    function renderCart() {
+      $('cartBody').innerHTML = cart.length ? cart.map((c, i) => `<tr><td>${esc(c.name)}</td><td class="r">${money(c.price)}</td><td class="r">${c.qty}</td><td class="r">${money(c.price * c.qty)}</td><td><button class="btn sm del" data-r="${i}">✕</button></td></tr>`).join('') : '<tr><td colspan="5" class="empty">Cart is empty.</td></tr>';
+      const t = totals();
+      $('tSub').textContent = 'Rs ' + money(t.sub); $('tDisc').textContent = '- Rs ' + money(t.disc);
+      $('tGst').textContent = 'Rs ' + money(t.gst); $('tGrand').textContent = 'Rs ' + money(t.total);
+    }
+    $('bAdd').onclick = () => {
+      const p = D.products.find(x => x.id === +$('bp').value), q = parseInt($('bq').value);
+      if (!p || isNaN(q) || q < 1) { toast('Select a product and valid quantity'); return }
+      const ex = cart.find(c => c.id === p.id), have = ex ? ex.qty : 0;
+      if (have + q > p.qty) { toast('Only ' + (p.qty - have) + ' more available'); return }
+      if (ex) ex.qty += q; else cart.push({ id: p.id, name: p.name, price: p.price, qty: q });
+      $('bq').value = 1; renderCart();
+    };
+    $('cartBody').onclick = e => { const r = e.target.dataset.r; if (r !== undefined) { cart.splice(+r, 1); renderCart() } };
+    $('disc').oninput = renderCart;
+    $('clr').onclick = () => { cart = []; renderCart() };
+    $('gen').onclick = () => {
+      if (!cart.length) { toast('Cart is empty'); return }
+      const body = { customer: $('cust').value.trim(), discount: parseFloat($('disc').value) || 0, items: cart.map(c => ({ id: c.id, qty: c.qty })) };
+      api('POST', '/api/bills', body).then(bill => {
+        cart = []; $('cust').value = ''; $('disc').value = 0; showInvoice(bill); return refresh();
+      }).catch(() => { });
+    };
+
+    /* invoice */
+    function showInvoice(b) {
+      $('invBody').innerHTML = `<h3>TAX INVOICE</h3>
+  <div>Bill No: ${b.no}<br>Date: ${esc(b.date)}<br>Customer: ${esc(b.customer)}</div><hr>
+  <table><thead><tr><th>Item</th><th class="r">Price</th><th class="r">Qty</th><th class="r">Total</th></tr></thead><tbody>
+  ${b.items.map(i => `<tr><td>${esc(i.name)}</td><td class="r">${money(i.price)}</td><td class="r">${i.qty}</td><td class="r">${money(i.price * i.qty)}</td></tr>`).join('')}
+  </tbody></table><hr>
+  <div class="row"><span>Subtotal</span><span>${money(b.sub)}</span></div>
+  <div class="row"><span>Discount</span><span>- ${money(b.disc)}</span></div>
+  <div class="row"><span>GST (${GST}%)</span><span>${money(b.gst)}</span></div>
+  <div class="row tot"><span>GRAND TOTAL (Rs)</span><span>${money(b.total)}</span></div>
+  <p style="text-align:center;margin-bottom:0">Thank you! Visit again.</p>`;
+      $('idlg').showModal();
+    }
+    $('ic').onclick = () => $('idlg').close();
+    $('ip').onclick = () => window.print();
+
+    /* sales */
+    function renderSales() {
+      const rev = D.sales.reduce((s, x) => s + x.total, 0);
+      $('sStats').innerHTML = [['Total bills', D.sales.length], ['Total revenue', 'Rs ' + money(rev)], ['Average bill', 'Rs ' + money(D.sales.length ? rev / D.sales.length : 0)]]
+        .map(a => `<div class="card stat"><small>${a[0]}</small><b>${a[1]}</b></div>`).join('');
+      $('salesBody').innerHTML = D.sales.length ? [...D.sales].reverse().map(b => `<tr><td>${b.no}</td><td>${esc(b.date)}</td><td>${esc(b.customer)}</td><td class="r">${b.items.length}</td><td class="r">${money(b.total)}</td><td><button class="btn sm sec" data-v="${b.no}">View</button></td></tr>`).join('') : '<tr><td colspan="6" class="empty">No sales yet.</td></tr>';
+    }
+    $('salesBody').onclick = e => { const n = e.target.dataset.v; if (n) { const b = D.sales.find(x => x.no === +n); if (b) showInvoice(b) } };
+
+    function render() { renderDash(); renderProducts(); renderBillSelect(); renderCart(); renderSales() }
+    refresh();
+  </script>
+</body>
+
+</html>
